@@ -1,0 +1,17 @@
+{
+  "name": "건배 — 한 잔 할까?",
+  "short_name": "건배",
+  "description": "퇴근길 한 손으로 즐기는 잔 따르기 게임. 완벽한 한 잔을 따르면 친구가 건배해 줘요.",
+  "lang": "ko",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14100c",
+  "theme_color": "#1c1410",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
