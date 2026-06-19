@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
-<title>건배 — 한 잔 할까?</title>
+<title>건배 — 30초 타임어택</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#1c1410" />
-<meta name="description" content="퇴근길 한 손으로 즐기는 잔 따르기 게임. 완벽한 한 잔을 따르면 친구가 건배해 줘요 🍻" />
+<meta name="description" content="30초 안에 완벽한 맥주를 따라라! 폰을 기울이면 거품이 덜 생겨요 🍻 랭킹에 도전!" />
 
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -27,113 +27,126 @@
   }
   #game { display: block; width: 100vw; height: 100vh; height: 100dvh; }
 
-  /* Top HUD */
+  /* Time bar */
+  #timebarWrap {
+    position: fixed; left: 0; right: 0; top: 0; height: 6px; z-index: 7;
+    background: rgba(255,255,255,0.08);
+  }
+  #timebar { height: 100%; width: 100%; background: linear-gradient(90deg,#ffd27a,#ff9f43); transition: background .2s; }
+
+  /* HUD */
   #hud {
     position: fixed; left: 0; right: 0;
-    top: calc(env(safe-area-inset-top, 0px) + 16px);
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 0 22px; pointer-events: none; z-index: 5;
+    top: calc(env(safe-area-inset-top, 0px) + 14px);
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 0 20px; pointer-events: none; z-index: 5;
   }
   .pill {
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: 15px;
+    border-radius: 999px; padding: 7px 15px; font-weight: 800; font-size: 15px;
     letter-spacing: 0.02em; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   }
-  #streak { color: #ffd27a; }
+  #time { font-size: 22px; padding: 8px 18px; }
+  #time.warn { color: #ff7a6a; border-color: rgba(255,120,90,0.5); }
+  #score { color: #ffd27a; }
 
-  /* Buddy speech bubble */
-  #buddy {
-    position: fixed; left: 50%; transform: translateX(-50%) translateY(8px);
-    top: calc(env(safe-area-inset-top, 0px) + 64px);
-    max-width: 80vw; width: max-content; z-index: 6;
-    background: linear-gradient(180deg, #fff6e9, #ffe9c9);
-    color: #4a2f12; font-weight: 700; font-size: 16px; line-height: 1.5;
-    padding: 14px 18px; border-radius: 18px; text-align: center;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.45);
-    opacity: 0; transition: opacity .4s ease, transform .4s ease; pointer-events: none;
-  }
-  #buddy.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  #buddy::after {
-    content: ""; position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%);
-    border: 9px solid transparent; border-top-color: #ffe9c9; border-bottom: 0;
-  }
-
-  /* Result + prompt */
   #result {
     position: fixed; left: 0; right: 0; z-index: 6; text-align: center;
-    bottom: 28%; font-size: 30px; font-weight: 900; letter-spacing: -0.01em;
-    text-shadow: 0 4px 24px rgba(0,0,0,0.5); opacity: 0;
-    transition: opacity .3s ease; pointer-events: none;
+    bottom: 27%; font-size: 28px; font-weight: 900; opacity: 0;
+    text-shadow: 0 4px 24px rgba(0,0,0,0.5); transition: opacity .2s ease; pointer-events: none;
   }
   #result.show { opacity: 1; }
   #prompt {
     position: fixed; left: 0; right: 0; z-index: 6; text-align: center;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
-    font-size: 16px; font-weight: 600; opacity: 0.7; pointer-events: none;
-    transition: opacity .25s ease;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 34px);
+    font-size: 15px; font-weight: 600; opacity: 0.72; pointer-events: none;
   }
 
-  /* Start overlay */
+  /* Overlays */
   .overlay {
     position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 16px; padding: 36px; text-align: center;
-    background: radial-gradient(120% 90% at 50% 35%, rgba(60,40,22,0.55), rgba(12,9,7,0.94));
-    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-    transition: opacity .4s ease;
+    align-items: center; justify-content: center; gap: 14px; padding: 30px; text-align: center;
+    background: radial-gradient(120% 90% at 50% 35%, rgba(60,40,22,0.6), rgba(12,9,7,0.95));
+    backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+    transition: opacity .35s ease; overflow-y: auto;
   }
   .overlay.hidden { opacity: 0; pointer-events: none; }
   .title {
-    font-size: 13vw; font-weight: 900; letter-spacing: -0.02em; line-height: 1.02;
+    font-size: 12vw; font-weight: 900; letter-spacing: -0.02em; line-height: 1.02;
     background: linear-gradient(180deg, #ffe9b0, #ffb24d 60%, #e7882a);
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 6px 26px rgba(255,160,60,0.35));
   }
-  .subtitle { font-size: 4.6vw; font-weight: 600; opacity: 0.82; max-width: 24ch; line-height: 1.6; }
+  .subtitle { font-size: 4.3vw; font-weight: 600; opacity: 0.85; max-width: 26ch; line-height: 1.6; }
   .cta {
-    margin-top: 18px; font-size: 5vw; font-weight: 800; padding: 16px 44px; border-radius: 999px;
+    margin-top: 8px; font-size: 5vw; font-weight: 800; padding: 15px 42px; border-radius: 999px;
     color: #2a1a08; background: linear-gradient(180deg, #ffe1a0, #ffc24d);
-    box-shadow: 0 12px 40px rgba(255,170,60,0.4); animation: pulse 1.9s ease-in-out infinite;
+    box-shadow: 0 12px 40px rgba(255,170,60,0.4); cursor: pointer;
   }
+  .cta.pulse { animation: pulse 1.9s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
-  .hint { margin-top: 22px; font-size: 3.6vw; opacity: 0.5; max-width: 26ch; line-height: 1.6; }
+  .hint { margin-top: 14px; font-size: 3.5vw; opacity: 0.55; max-width: 28ch; line-height: 1.6; }
 
+  /* Game-over ranking */
+  .bigscore { font-size: 20vw; font-weight: 900; line-height: 1;
+    background: linear-gradient(180deg,#fff,#ffd27a); -webkit-background-clip: text; background-clip:text; -webkit-text-fill-color: transparent; }
+  .label { font-size: 3.6vw; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.55; font-weight: 700; }
+  .ranks { width: 100%; max-width: 360px; margin-top: 6px; display: flex; flex-direction: column; gap: 6px; }
+  .rank {
+    display: flex; align-items: center; gap: 12px; padding: 9px 16px; border-radius: 12px;
+    background: rgba(255,255,255,0.05); font-size: 16px; font-weight: 600;
+  }
+  .rank.me { background: rgba(255,200,90,0.18); border: 1px solid rgba(255,200,90,0.4); }
+  .rank .num { width: 22px; opacity: 0.6; font-weight: 800; }
+  .rank .nm { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rank .sc { font-weight: 900; color: #ffd27a; }
+  .nameRow { display: flex; gap: 8px; width: 100%; max-width: 360px; margin-top: 4px; }
+  .nameRow input {
+    flex: 1; font-size: 17px; padding: 13px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.06); color: #fff; font-weight: 700; outline: none;
+  }
+  .nameRow button {
+    font-size: 16px; font-weight: 800; padding: 0 22px; border-radius: 12px; border: 0;
+    color: #2a1a08; background: linear-gradient(180deg,#ffe1a0,#ffc24d); cursor: pointer;
+  }
   @media (min-width: 520px) {
-    .title { font-size: 64px; } .subtitle { font-size: 22px; }
-    .cta { font-size: 24px; } .hint { font-size: 16px; }
+    .title { font-size: 60px; } .subtitle, .cta { font-size: 22px; } .hint { font-size: 15px; }
+    .bigscore { font-size: 96px; } .label { font-size: 14px; }
   }
 </style>
 </head>
 <body>
   <canvas id="game"></canvas>
 
+  <div id="timebarWrap" style="visibility:hidden"><div id="timebar"></div></div>
   <div id="hud" style="visibility:hidden">
-    <div class="pill" id="counter">0잔째</div>
-    <div class="pill" id="streak">연속 0</div>
+    <div class="pill" id="score">0점</div>
+    <div class="pill" id="time">30</div>
   </div>
 
-  <div id="buddy"></div>
   <div id="result"></div>
   <div id="prompt" style="visibility:hidden"></div>
 
+  <!-- Start -->
   <div id="startScreen" class="overlay">
-    <div class="title">한 잔<br>할까?</div>
-    <div class="subtitle">퇴근길, 기분이 좀 그런 날.<br>여기 앉아서 딱 한 잔 따라봐요. 🍻</div>
-    <div class="cta">잔 받기</div>
-    <div class="hint">화면을 <b>꾹 누르면</b> 맥주가 따라지고,<br><b>손을 떼면</b> 멈춰요. 노란 선에 딱 맞춰보세요.</div>
+    <div class="title">건배<br>타임어택</div>
+    <div class="subtitle"><b>30초</b> 안에 완벽한 맥주를 최대한 많이!<br>꾹 눌러 따르고, 노란 선에 딱 맞춰 떼세요.</div>
+    <div class="hint">📱 <b>폰을 기울이면</b> 거품이 덜 생겨요 (실제 맥주처럼!).<br>거품까지 노란 선에 맞추면 고득점 🍺<br><span style="opacity:.7">기울기 센서가 없으면 따르는 중 좌우로 드래그</span></div>
+    <div class="cta pulse" id="startBtn">시작!</div>
   </div>
+
+  <!-- Game over -->
+  <div id="overScreen" class="overlay hidden"></div>
 
 <script>
 (() => {
   "use strict";
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
-  const hud = document.getElementById("hud");
-  const counterEl = document.getElementById("counter");
-  const streakEl = document.getElementById("streak");
-  const buddyEl = document.getElementById("buddy");
-  const resultEl = document.getElementById("result");
-  const promptEl = document.getElementById("prompt");
-  const startScreen = document.getElementById("startScreen");
+  const $ = (id) => document.getElementById(id);
+  const canvas = $("game"), ctx = canvas.getContext("2d");
+  const hud = $("hud"), scoreEl = $("score"), timeEl = $("time");
+  const timebarWrap = $("timebarWrap"), timebar = $("timebar");
+  const resultEl = $("result"), promptEl = $("prompt");
+  const startScreen = $("startScreen"), overScreen = $("overScreen");
 
   // ---- Sizing ----------------------------------------------------------
   let W = 0, H = 0, DPR = 1;
@@ -144,53 +157,38 @@
     canvas.style.width = W + "px"; canvas.style.height = H + "px";
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
-  window.addEventListener("resize", resize);
-  resize();
+  window.addEventListener("resize", resize); resize();
 
-  // ---- Persistent stats ------------------------------------------------
-  const TOTAL_KEY = "cheers_total", BEST_KEY = "cheers_best_streak";
-  let total = parseInt(localStorage.getItem(TOTAL_KEY) || "0", 10) || 0;
-  let bestStreak = parseInt(localStorage.getItem(BEST_KEY) || "0", 10) || 0;
+  // ---- Config ----------------------------------------------------------
+  const SESSION = 30;             // seconds per game
+  const LIQUID_RATE = 0.58;       // liquid fraction filled per second
+  const MAX_TILT = 0.52;          // rad (~30deg) visual tilt at full input
+  const RANKS_KEY = "cheers_ranks", NAME_KEY = "cheers_name";
 
-  // ---- Warm buddy lines ------------------------------------------------
   const buddyLines = [
-    "오늘 하루도 진짜 고생 많았어. 자, 건배! 🍻",
-    "별일 없지? 그냥 말없이 한 잔 하자.",
-    "꾸리꾸리한 기분, 이 한 잔으로 싹— 내려가라.",
-    "천천히 마셔. 우리 시간 많아.",
-    "내일은 또 내일의 해가 뜨니까. 오늘은 여기까지!",
-    "말 안 해도 알아. 수고했어, 진짜.",
-    "한 잔 더? 오늘은 내가 살게.",
-    "거품 봐라, 완벽하잖아. 꼭 너처럼.",
-    "어깨 좀 펴. 그럴 자격 충분해.",
-    "짠— 소리 좋다. 기분 좀 풀렸어?",
-    "오늘은 그냥 아무 생각 말자. 짠!",
-    "힘든 얘기 안 해도 돼. 옆에 있을게.",
+    "오늘 하루도 진짜 고생 많았어. 짠! 🍻",
+    "이 정도면 사장님도 인정하지.",
+    "거품 봐라, 예술이다 진짜.",
+    "한 잔 더 가야지? 내가 살게.",
+    "꾸리꾸리한 기분 싹 날아갔길!",
   ];
-  function pickLine() { return buddyLines[(Math.random() * buddyLines.length) | 0]; }
 
   // ---- Geometry --------------------------------------------------------
   function glassRect() {
-    const gw = Math.min(W * 0.5, 230);
-    const gh = Math.min(H * 0.46, 360);
+    const gw = Math.min(W * 0.5, 230), gh = Math.min(H * 0.46, 360);
     return { x: (W - gw) / 2, y: H * 0.30, w: gw, h: gh };
   }
   const WALL = () => Math.max(6, glassRect().w * 0.05);
 
   // ---- State -----------------------------------------------------------
-  let state = "intro";          // intro | ready | pouring | result
-  let fill = 0;                 // 0..~1.2 (fraction of interior height)
-  let target = 0.84, band = 0.06;
-  let lastResult = null;        // 'perfect' | 'good' | 'low' | 'spill'
-  let streak = 0;
-  let resultAt = 0;
-  let bubbles = [];             // rising bubbles inside the beer
-  let spills = [];              // overflow droplets
-  let sparks = [];              // clink sparkles
-  let bokeh = [];               // background lights
-  let cheers = 0;               // clink animation progress 0..1
-  let shake = 0, glow = 0;
-  let wobble = 0, wobbleV = 0;  // surface wobble
+  let state = "intro";            // intro | playing | over
+  let phase = "ready";            // ready | pouring | judged
+  let timeLeft = SESSION, sessionScore = 0, glasses = 0;
+  let fill = 0, foam = 0, target = 0.84;
+  let tilt = 0, tiltSensor = 0, tiltSensorActive = false, tiltPointer = 0;
+  let nextAt = 0, lastResult = null;
+  let bubbles = [], spills = [], sparks = [], pops = [], bokeh = [];
+  let cheers = 0, shake = 0, glow = 0, wobble = 0, wobbleV = 0;
 
   // ---- Audio -----------------------------------------------------------
   let actx = null, pourOsc = null, pourGain = null;
@@ -200,132 +198,200 @@
     return actx;
   }
   function startPourSound() {
-    const a = audio(); if (!a) return;
-    stopPourSound();
+    const a = audio(); if (!a) return; stopPourSound();
     pourOsc = a.createOscillator(); pourGain = a.createGain();
-    pourOsc.type = "triangle"; pourOsc.frequency.value = 220;
-    pourGain.gain.value = 0.0001;
-    pourOsc.connect(pourGain); pourGain.connect(a.destination);
-    pourOsc.start();
+    pourOsc.type = "triangle"; pourOsc.frequency.value = 220; pourGain.gain.value = 0.0001;
+    pourOsc.connect(pourGain); pourGain.connect(a.destination); pourOsc.start();
     pourGain.gain.exponentialRampToValueAtTime(0.05, a.currentTime + 0.05);
   }
   function stopPourSound() {
-    if (pourOsc && actx) {
-      try {
-        pourGain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.05);
-        pourOsc.stop(actx.currentTime + 0.08);
-      } catch (e) {}
-      pourOsc = null; pourGain = null;
-    }
+    if (pourOsc && actx) { try {
+      pourGain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.05);
+      pourOsc.stop(actx.currentTime + 0.08);
+    } catch (e) {} pourOsc = null; }
   }
   function ting(freq, when, vol) {
     const a = audio(); if (!a) return;
-    const o = a.createOscillator(), g = a.createGain();
-    o.type = "sine"; o.frequency.value = freq;
-    o.connect(g); g.connect(a.destination);
-    const t = a.currentTime + (when || 0);
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(vol || 0.2, t + 0.005);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
-    o.start(t); o.stop(t + 0.5);
+    const o = a.createOscillator(), g = a.createGain(); o.type = "sine"; o.frequency.value = freq;
+    o.connect(g); g.connect(a.destination); const t = a.currentTime + (when || 0);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.2, t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4); o.start(t); o.stop(t + 0.45);
   }
   function thud() {
     const a = audio(); if (!a) return;
-    const o = a.createOscillator(), g = a.createGain();
-    o.type = "sawtooth"; o.frequency.value = 150;
-    o.connect(g); g.connect(a.destination);
-    const t = a.currentTime;
+    const o = a.createOscillator(), g = a.createGain(); o.type = "sawtooth"; o.frequency.value = 150;
+    o.connect(g); g.connect(a.destination); const t = a.currentTime;
     o.frequency.exponentialRampToValueAtTime(70, t + 0.25);
-    g.gain.setValueAtTime(0.18, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    g.gain.setValueAtTime(0.18, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
     o.start(t); o.stop(t + 0.32);
   }
   function vibrate(p) { if (navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} }
 
-  // ---- Round setup -----------------------------------------------------
-  function newGlass() {
-    fill = 0; wobble = 0; wobbleV = 0;
-    target = 0.74 + Math.random() * 0.14;     // 0.74 .. 0.88
-    band = 0.055 + Math.random() * 0.02;
-    bubbles = []; spills = []; sparks = []; cheers = 0;
-    lastResult = null;
-    state = "ready";
-    resultEl.classList.remove("show");
-    buddyEl.classList.remove("show");
-    promptEl.style.visibility = "visible";
-    promptEl.textContent = "꾹 눌러서 따라보세요";
+  // ---- Tilt (device orientation + pointer fallback) --------------------
+  function enableTilt() {
+    function handle(e) {
+      if (e.gamma == null) return;
+      tiltSensorActive = true;
+      tiltSensor = Math.min(1, Math.abs(e.gamma) / 38);   // ~38deg = full tilt
+    }
+    try {
+      if (typeof DeviceOrientationEvent !== "undefined" &&
+          typeof DeviceOrientationEvent.requestPermission === "function") {
+        DeviceOrientationEvent.requestPermission()
+          .then((s) => { if (s === "granted") window.addEventListener("deviceorientation", handle); })
+          .catch(() => {});
+      } else if (typeof DeviceOrientationEvent !== "undefined") {
+        window.addEventListener("deviceorientation", handle);
+      }
+    } catch (e) {}
   }
 
+  // ---- Flow ------------------------------------------------------------
   function start() {
-    audio();
-    startScreen.classList.add("hidden");
-    hud.style.visibility = "visible";
-    updateHud();
-    newGlass();
+    audio(); enableTilt();
+    state = "playing"; timeLeft = SESSION; sessionScore = 0; glasses = 0;
+    startScreen.classList.add("hidden"); overScreen.classList.add("hidden");
+    hud.style.visibility = "visible"; timebarWrap.style.visibility = "visible";
+    promptEl.style.visibility = "visible";
+    bubbles = []; spills = []; sparks = []; pops = [];
+    updateHud(); newGlass();
   }
 
-  function updateHud() {
-    counterEl.textContent = total + "잔째";
-    streakEl.textContent = "연속 " + streak + (bestStreak ? " · 최고 " + bestStreak : "");
+  function newGlass() {
+    fill = 0; foam = 0; wobble = 0; wobbleV = 0; cheers = 0;
+    tiltPointer = 0;
+    target = 0.76 + Math.random() * 0.12;        // 0.76 .. 0.88
+    phase = "ready"; lastResult = null;
+    resultEl.classList.remove("show");
+    promptEl.textContent = glasses === 0 ? "꾹 눌러 따르기 · 폰을 기울여 거품 줄이기" : "꾹 눌러서 따르기";
   }
 
-  // ---- Pour control ----------------------------------------------------
   function beginPour() {
-    if (state !== "ready") return;
-    state = "pouring";
-    promptEl.textContent = "손을 떼면 멈춰요";
+    if (phase !== "ready" || state !== "playing") return;
+    phase = "pouring"; promptEl.textContent = "기울이며 따르다가, 선에서 떼세요!";
     startPourSound();
   }
 
   function judge() {
-    if (state !== "pouring") return;
-    state = "result";
-    stopPourSound();
-    resultAt = performance.now();
-    wobbleV = -2.2;                  // splash wobble on stop
+    if (phase !== "pouring") return;
+    phase = "judged"; stopPourSound(); wobbleV = -2.2;
+    const total = fill + foam;
+    const g = glassRect();
+    let pts, label, color;
 
-    const lo = target - band, hi = target + band;
-    if (fill > 1.0) {
-      lastResult = "spill"; streak = 0;
-      showResult("앗, 넘쳤다! 🫧", "#ff8a6a");
-      thud(); vibrate([20, 30, 20]); shake = 9;
-    } else if (fill >= lo && fill <= hi) {
-      lastResult = "perfect"; streak++; total++;
-      showResult("완벽한 한 잔! 🍻", "#ffd27a");
-      doCheers(true);
-    } else if (fill >= lo - 0.07 && fill <= hi + 0.07) {
-      lastResult = "good"; streak = streak > 0 ? streak : 0; total++;
-      showResult(fill < lo ? "좋아, 마실 만해!" : "조금 넘실… 그래도 좋아!", "#bfe6ff");
-      doCheers(false);
+    if (total > 1.0) {
+      pts = 0; label = "넘쳤다! 0"; color = "#ff7a6a"; lastResult = "spill";
+      thud(); vibrate([20, 30]); shake = 9;
     } else {
-      lastResult = "low"; streak = 0; total++;
-      showResult(fill < lo ? "조금 아쉽네 🍺" : "거품이 많네!", "#cdd6e6");
-      ting(520, 0, 0.12); vibrate(10);
+      const err = Math.abs(total - target);
+      let base = Math.max(0, Math.round(100 - err * 700));
+      let headBonus = (foam >= 0.05 && foam <= 0.16) ? 15 : (foam < 0.03 ? -5 : 0);
+      const perfect = err < 0.025 && foam >= 0.05 && foam <= 0.16;
+      if (perfect) {
+        pts = 120; label = "완벽! +1.5초 ⏱"; color = "#ffd27a"; lastResult = "perfect";
+        timeLeft += 1.5; doCheers();
+      } else {
+        pts = Math.max(0, Math.min(115, base + headBonus));
+        if (pts >= 80) { label = "좋아! +" + pts; color = "#bff5c0"; }
+        else if (pts >= 45) { label = "+" + pts; color = "#bfe6ff"; }
+        else { label = (total < target ? "조금 아쉽 " : "거품 과다 ") + "+" + pts; color = "#cdd6e6"; }
+        ting(pts >= 80 ? 760 : 520, 0, 0.14); vibrate(8);
+      }
     }
-
-    bestStreak = Math.max(bestStreak, streak);
-    localStorage.setItem(TOTAL_KEY, String(total));
-    localStorage.setItem(BEST_KEY, String(bestStreak));
+    sessionScore += pts; glasses++;
+    pops.push({ x: W / 2, y: g.y - 6, text: label, color, life: 1, vy: -40 });
+    showResult(label, color);
     updateHud();
-
-    buddyEl.textContent = pickLine();
-    buddyEl.classList.add("show");
-    promptEl.textContent = "탭하면 다음 잔";
+    nextAt = performance.now() + (lastResult === "perfect" ? 650 : 520);
   }
 
   function showResult(text, color) {
-    resultEl.textContent = streak >= 2 && (lastResult === "perfect")
-      ? text + "  연속 " + streak + "!" : text;
-    resultEl.style.color = color;
-    resultEl.classList.add("show");
+    resultEl.textContent = text; resultEl.style.color = color; resultEl.classList.add("show");
+  }
+  function doCheers() { cheers = 0.001; glow = 1; vibrate([12, 30, 12]); }
+
+  function endSession() {
+    state = "over"; stopPourSound();
+    hud.style.visibility = "hidden"; timebarWrap.style.visibility = "hidden";
+    promptEl.style.visibility = "hidden"; resultEl.classList.remove("show");
+    renderOver();
   }
 
-  function doCheers(perfect) {
-    cheers = 0.001;                  // triggers clink animation in update
-    glow = 1;
-    vibrate(perfect ? [12, 30, 12] : 12);
-    // sparkles spawned when glasses meet (handled in update at peak)
+  function updateHud() {
+    scoreEl.textContent = sessionScore + "점";
+    const t = Math.max(0, Math.ceil(timeLeft));
+    timeEl.textContent = t;
+    timeEl.classList.toggle("warn", timeLeft <= 5);
+    const pct = Math.max(0, timeLeft / SESSION) * 100;
+    timebar.style.width = pct + "%";
+    timebar.style.background = timeLeft <= 5
+      ? "linear-gradient(90deg,#ff7a6a,#ff5a4a)" : "linear-gradient(90deg,#ffd27a,#ff9f43)";
   }
+
+  // ---- Ranking ---------------------------------------------------------
+  function getRanks() { try { return JSON.parse(localStorage.getItem(RANKS_KEY) || "[]"); } catch (e) { return []; } }
+  function saveRanks(r) { localStorage.setItem(RANKS_KEY, JSON.stringify(r.slice(0, 10))); }
+
+  function renderOver() {
+    const ranks = getRanks();
+    const lowest = ranks.length ? ranks[ranks.length - 1].score : 0;
+    const qualifies = ranks.length < 10 || sessionScore > lowest;
+    let myIndex = -1;
+
+    const head = `
+      <div class="label">점수 · ${glasses}잔</div>
+      <div class="bigscore">${sessionScore}</div>`;
+
+    function listHtml(rs, hi) {
+      if (!rs.length) return `<div class="hint">아직 기록이 없어요. 첫 주인공이 되어보세요!</div>`;
+      return `<div class="ranks">` + rs.map((r, i) =>
+        `<div class="rank ${i === hi ? "me" : ""}">
+           <span class="num">${i + 1}</span>
+           <span class="nm">${i === 0 ? "👑 " : ""}${escapeHtml(r.name)}</span>
+           <span class="sc">${r.score}</span>
+         </div>`).join("") + `</div>`;
+    }
+
+    if (qualifies) {
+      const lastName = localStorage.getItem(NAME_KEY) || "";
+      overScreen.innerHTML = head +
+        `<div class="label" style="color:#ffd27a">🏆 랭킹 진입!</div>
+         <div class="nameRow">
+           <input id="nameInput" maxlength="10" placeholder="이름" value="${escapeHtml(lastName)}" />
+           <button id="saveName">등록</button>
+         </div>
+         <div id="rankList">${listHtml(ranks, -1)}</div>
+         <div class="cta" id="retryBtn" style="margin-top:18px">다시 도전</div>`;
+      overScreen.classList.remove("hidden");
+      const input = $("nameInput");
+      $("saveName").onclick = () => {
+        const name = (input.value.trim() || "익명").slice(0, 10);
+        localStorage.setItem(NAME_KEY, name);
+        const list = getRanks();
+        const entry = { name, score: sessionScore, ts: Date.now() };
+        list.push(entry); list.sort((a, b) => b.score - a.score);
+        const trimmed = list.slice(0, 10);
+        myIndex = trimmed.indexOf(entry);
+        saveRanks(trimmed);
+        $("rankList").innerHTML = listHtml(trimmed, myIndex);
+        $("nameInput").parentElement.style.display = "none";
+        $("saveName").parentElement.style.display = "none";
+        ting(1180, 0, 0.2); ting(1560, 0.02, 0.16);
+      };
+      $("retryBtn").onclick = start;
+      setTimeout(() => { try { input.focus(); } catch (e) {} }, 100);
+    } else {
+      const line = buddyLines[(Math.random() * buddyLines.length) | 0];
+      overScreen.innerHTML = head +
+        `<div class="subtitle" style="margin-top:4px">${line}</div>` +
+        listHtml(ranks, -1) +
+        `<div class="cta" id="retryBtn" style="margin-top:18px">다시 도전</div>`;
+      overScreen.classList.remove("hidden");
+      $("retryBtn").onclick = start;
+    }
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
   // ---- Update ----------------------------------------------------------
   let last = performance.now();
@@ -334,145 +400,134 @@
     const interiorTop = g.y + wall, interiorBot = g.y + g.h - wall;
     const interiorH = interiorBot - interiorTop;
 
-    if (state === "pouring") {
-      const rate = 0.46 + fill * 0.10;          // gentle, slightly accelerating
-      fill += rate * dt;
-      // continuous spill once it tops out
-      if (fill > 1.0) {
-        if (Math.random() < 0.6) {
-          const lx = g.x + wall + Math.random() * (g.w - 2 * wall);
-          spills.push({ x: lx, y: interiorTop, vx: (Math.random() - 0.5) * 60, vy: 20, r: 2 + Math.random() * 2, life: 1 });
-        }
-        if (fill > 1.18) judge();              // auto-stop if they really overdo it
-      }
-      if (pourOsc) pourOsc.frequency.value = 220 + fill * 260;
-      // spawn rising bubbles
-      if (Math.random() < 0.5) spawnBubble(g, wall, interiorBot, interiorH);
+    // resolve tilt
+    const tTarget = tiltSensorActive ? tiltSensor : tiltPointer;
+    tilt += (tTarget - tilt) * Math.min(1, dt * 12);
+
+    if (state === "playing") {
+      timeLeft -= dt;
+      updateHud();
+      if (timeLeft <= 0) { endSession(); return; }
     }
 
-    // surface wobble (spring)
-    wobbleV += (-wobble) * 18 * dt; wobbleV *= 0.90; wobble += wobbleV * dt;
+    if (phase === "pouring") {
+      fill += LIQUID_RATE * dt;
+      const foamFactor = 0.6 - tilt * 0.52;        // upright=0.6, tilted~0.08
+      foam += LIQUID_RATE * Math.max(0.05, foamFactor) * dt;
+      if (fill + foam > 1.0) {
+        if (Math.random() < 0.6) spills.push({
+          x: g.x + wall + Math.random() * (g.w - 2 * wall), y: interiorTop,
+          vx: (Math.random() - 0.5) * 70, vy: 20, r: 2 + Math.random() * 2, life: 1 });
+        if (fill + foam > 1.16) judge();
+      }
+      if (pourOsc) pourOsc.frequency.value = 220 + (fill + foam) * 260;
+      if (Math.random() < 0.5) spawnBubble(g, wall, interiorBot, interiorH);
+    } else if (foam > 0) {
+      foam = Math.max(0, foam - 0.05 * dt);        // foam slowly settles
+    }
 
-    // bubbles rise
+    // auto-advance to next glass
+    if (phase === "judged" && state === "playing" && performance.now() >= nextAt) newGlass();
+
+    wobbleV += (-wobble) * 18 * dt; wobbleV *= 0.9; wobble += wobbleV * dt;
+
     for (const b of bubbles) { b.y -= b.spd * dt; b.life -= dt * 0.25; }
-    bubbles = bubbles.filter(b => b.life > 0 && b.y > interiorTop - 4);
-    if (state !== "pouring" && fill > 0.05 && Math.random() < 0.12) spawnBubble(g, wall, interiorBot, interiorH);
+    bubbles = bubbles.filter((b) => b.life > 0 && b.y > interiorTop - 4);
 
-    // spills fall
     for (const s of spills) { s.vy += 700 * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt * 0.8; }
-    spills = spills.filter(s => s.y < H + 30 && s.life > 0);
+    spills = spills.filter((s) => s.y < H + 30 && s.life > 0);
 
-    // clink animation
     if (cheers > 0 && cheers < 1) {
-      const prev = cheers;
-      cheers = Math.min(1, cheers + dt * 1.6);
-      if (prev < 0.5 && cheers >= 0.5) {       // glasses meet
+      const prev = cheers; cheers = Math.min(1, cheers + dt * 1.7);
+      if (prev < 0.5 && cheers >= 0.5) {
         ting(1180, 0, 0.22); ting(1560, 0.02, 0.16);
         const cx = W / 2 + g.w * 0.62, cy = g.y + g.h * 0.3;
         for (let i = 0; i < 16; i++) {
-          const a = Math.random() * Math.PI * 2, sp = 60 + Math.random() * 180;
+          const a = Math.random() * 6.28, sp = 60 + Math.random() * 180;
           sparks.push({ x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, life: 1, hue: 45 + Math.random() * 15 });
         }
         shake = 5;
       }
     }
     for (const sp of sparks) { sp.vy += 400 * dt; sp.x += sp.vx * dt; sp.y += sp.vy * dt; sp.life -= dt * 1.5; }
-    sparks = sparks.filter(s => s.life > 0);
+    sparks = sparks.filter((s) => s.life > 0);
+
+    for (const p of pops) { p.y += p.vy * dt; p.life -= dt * 1.1; }
+    pops = pops.filter((p) => p.life > 0);
 
     if (shake > 0) shake = Math.max(0, shake - dt * 26);
     if (glow > 0) glow = Math.max(0, glow - dt * 1.4);
-
-    // background bokeh drift
     for (const k of bokeh) { k.y -= k.spd * dt; if (k.y < -40) { k.y = H + 40; k.x = Math.random() * W; } }
   }
 
   function spawnBubble(g, wall, interiorBot, interiorH) {
-    const level = interiorBot - fill * interiorH;
     bubbles.push({
       x: g.x + wall + Math.random() * (g.w - 2 * wall),
-      y: interiorBot - Math.random() * Math.max(2, (interiorBot - level)),
-      r: 1.2 + Math.random() * 2.2, spd: 20 + Math.random() * 40, life: 1,
-    });
+      y: interiorBot - Math.random() * Math.max(2, fill * interiorH),
+      r: 1.2 + Math.random() * 2.2, spd: 20 + Math.random() * 40, life: 1 });
   }
 
   // ---- Render ----------------------------------------------------------
   function roundRect(x, y, w, h, r) {
-    r = Math.min(r, w / 2, h / 2);
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
+    r = Math.min(r, w / 2, h / 2); ctx.beginPath(); ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
   }
 
-  function drawGlass(cx, scale, tilt, isBuddy) {
+  function drawGlass(cx, scale, tiltAngle, isBuddy) {
     const g = glassRect(), wall = WALL();
     ctx.save();
-    ctx.translate(cx, g.y + g.h / 2);
-    ctx.rotate(tilt);
-    ctx.scale(scale, scale);
+    ctx.translate(cx, g.y + g.h / 2); ctx.rotate(tiltAngle); ctx.scale(scale, scale);
     ctx.translate(-(g.x + g.w / 2), -(g.y + g.h / 2));
 
-    const r = g.w * 0.10;
-    const interiorTop = g.y + wall, interiorBot = g.y + g.h - wall;
+    const r = g.w * 0.10, interiorTop = g.y + wall, interiorBot = g.y + g.h - wall;
     const interiorH = interiorBot - interiorTop;
-    const f = isBuddy ? 0.82 : Math.min(fill, 1.0);
-    const surf = interiorBot - f * interiorH + (isBuddy ? 0 : wobble * 6);
+    const lf = isBuddy ? 0.7 : Math.min(fill, 1.0);
+    const fm = isBuddy ? 0.12 : Math.min(foam, 1.0 - lf + 0.001);
+    const liquidTop = interiorBot - lf * interiorH + (isBuddy ? 0 : wobble * 6);
+    const foamTop = liquidTop - fm * interiorH;
 
-    // glass back / body
-    ctx.fillStyle = "rgba(220,230,245,0.10)";
-    roundRect(g.x, g.y, g.w, g.h, r); ctx.fill();
+    ctx.fillStyle = "rgba(220,230,245,0.10)"; roundRect(g.x, g.y, g.w, g.h, r); ctx.fill();
 
-    // beer
-    if (f > 0.001) {
+    if (lf > 0.001 || fm > 0.001) {
       ctx.save();
-      roundRect(g.x + wall, interiorTop, g.w - 2 * wall, interiorH, r * 0.6);
-      ctx.clip();
-      const grad = ctx.createLinearGradient(0, surf, 0, interiorBot);
+      roundRect(g.x + wall, interiorTop, g.w - 2 * wall, interiorH, r * 0.6); ctx.clip();
+      // liquid
+      const grad = ctx.createLinearGradient(0, liquidTop, 0, interiorBot);
       grad.addColorStop(0, "#ffcf66"); grad.addColorStop(1, "#e08a1e");
-      ctx.fillStyle = grad;
-      ctx.fillRect(g.x + wall, surf, g.w - 2 * wall, interiorBot - surf);
+      ctx.fillStyle = grad; ctx.fillRect(g.x + wall, liquidTop, g.w - 2 * wall, interiorBot - liquidTop);
       // bubbles
       for (const b of bubbles) {
-        ctx.globalAlpha = Math.max(0, Math.min(1, b.life)) * 0.7;
-        ctx.fillStyle = "#fff3cf";
+        ctx.globalAlpha = Math.max(0, Math.min(1, b.life)) * 0.7; ctx.fillStyle = "#fff3cf";
         ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill();
       }
       ctx.globalAlpha = 1;
-      // foam cap
-      const foamH = Math.min(interiorH * 0.14, f * interiorH);
-      ctx.fillStyle = "#fbf6ec";
-      ctx.fillRect(g.x + wall, surf - foamH * 0.5, g.w - 2 * wall, foamH);
-      for (let i = 0; i < 5; i++) {
-        const bx = g.x + wall + (i + 0.5) * (g.w - 2 * wall) / 5;
-        ctx.beginPath(); ctx.arc(bx, surf - foamH * 0.5, foamH * 0.45, 0, 7); ctx.fill();
+      // foam
+      if (fm > 0.001) {
+        const fh = liquidTop - foamTop;
+        ctx.fillStyle = "#fbf6ec"; ctx.fillRect(g.x + wall, foamTop, g.w - 2 * wall, fh + 2);
+        for (let i = 0; i < 5; i++) {
+          const bx = g.x + wall + (i + 0.5) * (g.w - 2 * wall) / 5;
+          ctx.beginPath(); ctx.arc(bx, foamTop, Math.min(fh, (g.w - 2 * wall) / 10) * 0.9 + 1, 0, 7); ctx.fill();
+        }
       }
       ctx.restore();
     }
 
-    // target band (only on the player glass, while not yet judged perfectly)
-    if (!isBuddy && (state === "ready" || state === "pouring")) {
-      const yHi = interiorBot - (target + band) * interiorH;
-      const yLo = interiorBot - (target - band) * interiorH;
-      ctx.fillStyle = "rgba(255,210,120,0.14)";
-      ctx.fillRect(g.x + wall, yHi, g.w - 2 * wall, yLo - yHi);
+    // target line (player only, before judged)
+    if (!isBuddy && (phase === "ready" || phase === "pouring")) {
       const yMid = interiorBot - target * interiorH;
-      ctx.strokeStyle = "rgba(255,213,110,0.9)";
-      ctx.lineWidth = 2; ctx.setLineDash([7, 6]);
+      ctx.fillStyle = "rgba(255,210,120,0.10)";
+      ctx.fillRect(g.x + wall, yMid - interiorH * 0.04, g.w - 2 * wall, interiorH * 0.08);
+      ctx.strokeStyle = "rgba(255,213,110,0.95)"; ctx.lineWidth = 2; ctx.setLineDash([7, 6]);
       ctx.beginPath(); ctx.moveTo(g.x + wall, yMid); ctx.lineTo(g.x + g.w - wall, yMid); ctx.stroke();
       ctx.setLineDash([]);
     }
 
-    // glass rim / walls (front frame)
-    ctx.lineWidth = wall;
-    ctx.strokeStyle = "rgba(225,235,250,0.55)";
+    ctx.lineWidth = wall; ctx.strokeStyle = "rgba(225,235,250,0.55)";
     roundRect(g.x + wall / 2, g.y + wall / 2, g.w - wall, g.h - wall, r); ctx.stroke();
-    // shine
     ctx.fillStyle = "rgba(255,255,255,0.16)";
     roundRect(g.x + wall * 1.4, g.y + wall * 1.4, g.w * 0.12, g.h - wall * 3, g.w * 0.06); ctx.fill();
-
     ctx.restore();
   }
 
@@ -480,19 +535,16 @@
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     if (shake > 0) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
 
-    // warm pub background
     const bg = ctx.createLinearGradient(0, 0, 0, H);
     bg.addColorStop(0, "#2a1c12"); bg.addColorStop(0.6, "#1a120c"); bg.addColorStop(1, "#0d0907");
     ctx.fillStyle = bg; ctx.fillRect(-20, -20, W + 40, H + 40);
 
-    // bokeh lights
     for (const k of bokeh) {
       const rg = ctx.createRadialGradient(k.x, k.y, 0, k.x, k.y, k.r);
       rg.addColorStop(0, `rgba(255,190,110,${k.a})`); rg.addColorStop(1, "rgba(255,190,110,0)");
       ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(k.x, k.y, k.r, 0, 7); ctx.fill();
     }
 
-    // warm table glow under glasses
     const g = glassRect();
     if (glow > 0) {
       const rg = ctx.createRadialGradient(W / 2, g.y + g.h, 0, W / 2, g.y + g.h, g.w * 1.6);
@@ -500,74 +552,75 @@
       ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(W / 2, g.y + g.h * 0.6, g.w * 1.6, 0, 7); ctx.fill();
     }
 
-    // player glass (slides slightly left during clink)
     const cIn = cheers > 0 ? Math.sin(Math.min(cheers, 1) * Math.PI) : 0;
-    drawGlass(W / 2 - cIn * g.w * 0.10, 1, -cIn * 0.12, false);
-
-    // buddy glass appears during clink
+    const playerTilt = (phase === "pouring" || phase === "ready") ? -tilt * MAX_TILT : -cIn * 0.12;
+    drawGlass(W / 2 - cIn * g.w * 0.10, 1, playerTilt, false);
     if (cheers > 0) {
       const enter = Math.min(1, cheers / 0.5);
-      const bx = W + g.w - enter * (g.w * 1.7);
-      drawGlass(bx, 0.94, cIn * 0.16, true);
+      drawGlass(W + g.w - enter * (g.w * 1.7), 0.94, cIn * 0.16, true);
     }
 
-    // spill droplets
-    for (const s of spills) {
-      ctx.globalAlpha = Math.max(0, s.life);
-      ctx.fillStyle = "#f4b64a"; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
-    }
-    // sparks
-    for (const sp of sparks) {
-      ctx.globalAlpha = Math.max(0, sp.life);
-      ctx.fillStyle = `hsl(${sp.hue},100%,70%)`;
-      ctx.fillRect(sp.x - 2, sp.y - 2, 4, 4);
-    }
+    for (const s of spills) { ctx.globalAlpha = Math.max(0, s.life); ctx.fillStyle = "#f4b64a";
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill(); }
+    for (const sp of sparks) { ctx.globalAlpha = Math.max(0, sp.life);
+      ctx.fillStyle = `hsl(${sp.hue},100%,70%)`; ctx.fillRect(sp.x - 2, sp.y - 2, 4, 4); }
+    // score pops
+    ctx.textAlign = "center"; ctx.font = `800 ${Math.round(W * 0.05)}px -apple-system, system-ui, sans-serif`;
+    for (const p of pops) { ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 1.4));
+      ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y); }
     ctx.globalAlpha = 1;
+
+    // tilt indicator while pouring (foam feedback)
+    if (phase === "pouring" || phase === "ready") {
+      const pct = Math.round(tilt * 100);
+      ctx.globalAlpha = 0.8; ctx.fillStyle = tilt > 0.45 ? "#9fe7a0" : "#ffd27a";
+      ctx.font = `700 ${Math.round(W * 0.036)}px -apple-system, system-ui, sans-serif`;
+      ctx.fillText(tilt > 0.45 ? "기울임 좋아요 · 거품 ↓" : "📱 기울이면 거품 ↓", W / 2, g.y + g.h + 34);
+      ctx.globalAlpha = 1;
+    }
 
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
 
   function loop(now) {
-    let dt = (now - last) / 1000; last = now;
-    if (dt > 0.05) dt = 0.05;
-    update(dt); render();
-    requestAnimationFrame(loop);
+    let dt = (now - last) / 1000; last = now; if (dt > 0.05) dt = 0.05;
+    update(dt); render(); requestAnimationFrame(loop);
   }
 
   // ---- Input -----------------------------------------------------------
   function onDown() {
-    if (state === "intro") { start(); return; }   // start screen → first glass
-    if (state === "ready") { beginPour(); return; }
-    if (state === "result" && performance.now() - resultAt > 280) { newGlass(); }
+    if (state === "intro") { start(); return; }
+    if (state === "playing" && phase === "ready") beginPour();
   }
-  function onUp() { if (state === "pouring") judge(); }
+  function onUp() { if (state === "playing" && phase === "pouring") judge(); }
+  function onMove(x) {
+    if (phase === "pouring" && !tiltSensorActive)
+      tiltPointer = Math.min(1, Math.abs(x - W / 2) / (W * 0.36));
+  }
 
-  window.addEventListener("pointerdown", (e) => { e.preventDefault(); onDown(); }, { passive: false });
-  window.addEventListener("pointerup", (e) => { e.preventDefault(); onUp(); }, { passive: false });
-  window.addEventListener("pointercancel", () => { if (state === "pouring") judge(); });
+  window.addEventListener("pointerdown", (e) => {
+    if (state === "over") return;             // over screen uses its own buttons
+    e.preventDefault(); onDown();
+  }, { passive: false });
+  window.addEventListener("pointermove", (e) => { if (state === "playing") onMove(e.clientX); });
+  window.addEventListener("pointerup", (e) => { if (state === "over") return; e.preventDefault(); onUp(); }, { passive: false });
+  window.addEventListener("pointercancel", () => { if (phase === "pouring") judge(); });
   window.addEventListener("keydown", (e) => {
-    if (e.code === "Space") {
-      e.preventDefault();
-      if (e.repeat) return;
-      if (state === "intro") start();
-      else if (state === "ready") beginPour();
-      else if (state === "result") onDown();
-    }
+    if (e.code !== "Space" || e.repeat) return; e.preventDefault();
+    if (state === "intro") start(); else if (phase === "ready") beginPour();
   });
-  window.addEventListener("keyup", (e) => { if (e.code === "Space" && state === "pouring") judge(); });
+  window.addEventListener("keyup", (e) => { if (e.code === "Space" && phase === "pouring") judge(); });
+  $("startBtn").addEventListener("click", (e) => { e.stopPropagation(); start(); });
   document.addEventListener("gesturestart", (e) => e.preventDefault());
   document.addEventListener("dblclick", (e) => e.preventDefault());
 
   // ---- Boot ------------------------------------------------------------
-  for (let i = 0; i < 14; i++) {
-    bokeh.push({ x: Math.random() * W, y: Math.random() * H, r: 30 + Math.random() * 80,
-                 a: 0.05 + Math.random() * 0.10, spd: 4 + Math.random() * 10 });
-  }
+  for (let i = 0; i < 14; i++) bokeh.push({ x: Math.random() * W, y: Math.random() * H,
+    r: 30 + Math.random() * 80, a: 0.05 + Math.random() * 0.1, spd: 4 + Math.random() * 10 });
   requestAnimationFrame(loop);
 
-  if ("serviceWorker" in navigator) {
+  if ("serviceWorker" in navigator)
     window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js").catch(() => {}));
-  }
 })();
 </script>
 </body>
