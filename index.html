@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
-<title>건배 — 30초 타임어택</title>
+<title>건배 — 완벽한 한 잔</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#1c1410" />
-<meta name="description" content="30초 안에 완벽한 맥주를 따라라! 폰을 기울이면 거품이 덜 생겨요 🍻 랭킹에 도전!" />
+<meta name="description" content="완벽한 한 잔을 따라라! 폰을 기울이면(PC는 마우스 좌우) 거품이 덜 생겨요 🍻 랭킹 도전!" />
 
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -27,29 +27,6 @@
   }
   #game { display: block; width: 100vw; height: 100vh; height: 100dvh; }
 
-  /* Time bar */
-  #timebarWrap {
-    position: fixed; left: 0; right: 0; top: 0; height: 6px; z-index: 7;
-    background: rgba(255,255,255,0.08);
-  }
-  #timebar { height: 100%; width: 100%; background: linear-gradient(90deg,#ffd27a,#ff9f43); transition: background .2s; }
-
-  /* HUD */
-  #hud {
-    position: fixed; left: 0; right: 0;
-    top: calc(env(safe-area-inset-top, 0px) + 14px);
-    display: flex; justify-content: space-between; align-items: flex-start;
-    padding: 0 20px; pointer-events: none; z-index: 5;
-  }
-  .pill {
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 999px; padding: 7px 15px; font-weight: 800; font-size: 15px;
-    letter-spacing: 0.02em; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  }
-  #time { font-size: 22px; padding: 8px 18px; }
-  #time.warn { color: #ff7a6a; border-color: rgba(255,120,90,0.5); }
-  #score { color: #ffd27a; }
-
   #result {
     position: fixed; left: 0; right: 0; z-index: 6; text-align: center;
     bottom: 27%; font-size: 28px; font-weight: 900; opacity: 0;
@@ -61,8 +38,19 @@
     bottom: calc(env(safe-area-inset-bottom, 0px) + 34px);
     font-size: 15px; font-weight: 600; opacity: 0.72; pointer-events: none;
   }
+  #bestTag {
+    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 16px); left: 0; right: 0;
+    text-align: center; z-index: 5; font-size: 14px; font-weight: 700; opacity: 0.5;
+    letter-spacing: 0.08em; pointer-events: none;
+  }
+  #tiltBtn {
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 68px); z-index: 8; display: none;
+    border: 1px solid rgba(255,210,120,0.5); background: rgba(255,200,90,0.16); color: #ffd27a;
+    font-weight: 800; font-size: 15px; padding: 12px 22px; border-radius: 999px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); cursor: pointer;
+  }
 
-  /* Overlays */
   .overlay {
     position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 14px; padding: 30px; text-align: center;
@@ -87,55 +75,42 @@
   @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
   .hint { margin-top: 14px; font-size: 3.5vw; opacity: 0.55; max-width: 28ch; line-height: 1.6; }
 
-  /* Game-over ranking */
-  .bigscore { font-size: 20vw; font-weight: 900; line-height: 1;
+  .bigscore { font-size: 22vw; font-weight: 900; line-height: 1;
     background: linear-gradient(180deg,#fff,#ffd27a); -webkit-background-clip: text; background-clip:text; -webkit-text-fill-color: transparent; }
   .label { font-size: 3.6vw; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.55; font-weight: 700; }
   .ranks { width: 100%; max-width: 360px; margin-top: 6px; display: flex; flex-direction: column; gap: 6px; }
-  .rank {
-    display: flex; align-items: center; gap: 12px; padding: 9px 16px; border-radius: 12px;
-    background: rgba(255,255,255,0.05); font-size: 16px; font-weight: 600;
-  }
+  .rank { display: flex; align-items: center; gap: 12px; padding: 9px 16px; border-radius: 12px;
+    background: rgba(255,255,255,0.05); font-size: 16px; font-weight: 600; }
   .rank.me { background: rgba(255,200,90,0.18); border: 1px solid rgba(255,200,90,0.4); }
   .rank .num { width: 22px; opacity: 0.6; font-weight: 800; }
   .rank .nm { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rank .sc { font-weight: 900; color: #ffd27a; }
   .nameRow { display: flex; gap: 8px; width: 100%; max-width: 360px; margin-top: 4px; }
-  .nameRow input {
-    flex: 1; font-size: 17px; padding: 13px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.18);
-    background: rgba(255,255,255,0.06); color: #fff; font-weight: 700; outline: none;
-  }
-  .nameRow button {
-    font-size: 16px; font-weight: 800; padding: 0 22px; border-radius: 12px; border: 0;
-    color: #2a1a08; background: linear-gradient(180deg,#ffe1a0,#ffc24d); cursor: pointer;
-  }
+  .nameRow input { flex: 1; font-size: 17px; padding: 13px 16px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: #fff; font-weight: 700; outline: none; }
+  .nameRow button { font-size: 16px; font-weight: 800; padding: 0 22px; border-radius: 12px; border: 0;
+    color: #2a1a08; background: linear-gradient(180deg,#ffe1a0,#ffc24d); cursor: pointer; }
   @media (min-width: 520px) {
     .title { font-size: 60px; } .subtitle, .cta { font-size: 22px; } .hint { font-size: 15px; }
-    .bigscore { font-size: 96px; } .label { font-size: 14px; }
+    .bigscore { font-size: 110px; } .label { font-size: 14px; }
   }
 </style>
 </head>
 <body>
   <canvas id="game"></canvas>
 
-  <div id="timebarWrap" style="visibility:hidden"><div id="timebar"></div></div>
-  <div id="hud" style="visibility:hidden">
-    <div class="pill" id="score">0점</div>
-    <div class="pill" id="time">30</div>
-  </div>
-
+  <div id="bestTag"></div>
   <div id="result"></div>
   <div id="prompt" style="visibility:hidden"></div>
+  <button id="tiltBtn">📱 기울기 센서 켜기</button>
 
-  <!-- Start -->
   <div id="startScreen" class="overlay">
-    <div class="title">건배<br>타임어택</div>
-    <div class="subtitle"><b>30초</b> 안에 완벽한 맥주를 최대한 많이!<br>꾹 눌러 따르고, 노란 선에 딱 맞춰 떼세요.</div>
-    <div class="hint">📱 <b>폰을 기울이면</b> 거품이 덜 생겨요 (실제 맥주처럼!).<br>거품까지 노란 선에 맞추면 고득점 🍺<br><span style="opacity:.7">기울기 센서가 없으면 따르는 중 좌우로 드래그</span></div>
-    <div class="cta pulse" id="startBtn">시작!</div>
+    <div class="title">완벽한<br>한 잔</div>
+    <div class="subtitle">꾹 눌러 맥주를 따르고,<br>거품까지 <b>노란 선</b>에 딱 맞춰 떼세요!</div>
+    <div class="hint">📱 <b>폰을 기울이면</b> 거품이 덜 생겨요 (실제 맥주처럼!).<br>거품 머리를 적당히 남기면 만점에 가까워져요 🍺<br><span style="opacity:.7">PC에서는 <b>마우스를 좌우로</b> 움직여 기울이세요</span></div>
+    <div class="cta pulse" id="startBtn">잔 받기</div>
   </div>
 
-  <!-- Game over -->
   <div id="overScreen" class="overlay hidden"></div>
 
 <script>
@@ -143,9 +118,7 @@
   "use strict";
   const $ = (id) => document.getElementById(id);
   const canvas = $("game"), ctx = canvas.getContext("2d");
-  const hud = $("hud"), scoreEl = $("score"), timeEl = $("time");
-  const timebarWrap = $("timebarWrap"), timebar = $("timebar");
-  const resultEl = $("result"), promptEl = $("prompt");
+  const resultEl = $("result"), promptEl = $("prompt"), bestTag = $("bestTag"), tiltBtn = $("tiltBtn");
   const startScreen = $("startScreen"), overScreen = $("overScreen");
 
   // ---- Sizing ----------------------------------------------------------
@@ -160,17 +133,16 @@
   window.addEventListener("resize", resize); resize();
 
   // ---- Config ----------------------------------------------------------
-  const SESSION = 30;             // seconds per game
-  const LIQUID_RATE = 0.58;       // liquid fraction filled per second
+  const LIQUID_RATE = 0.5;        // liquid fraction filled per second
   const MAX_TILT = 0.52;          // rad (~30deg) visual tilt at full input
-  const RANKS_KEY = "cheers_ranks", NAME_KEY = "cheers_name";
+  const RANKS_KEY = "cheers_ranks", NAME_KEY = "cheers_name", BEST_KEY = "cheers_best";
 
   const buddyLines = [
     "오늘 하루도 진짜 고생 많았어. 짠! 🍻",
     "이 정도면 사장님도 인정하지.",
     "거품 봐라, 예술이다 진짜.",
-    "한 잔 더 가야지? 내가 살게.",
     "꾸리꾸리한 기분 싹 날아갔길!",
+    "천천히 마셔. 시간 많아, 우리.",
   ];
 
   // ---- Geometry --------------------------------------------------------
@@ -181,12 +153,11 @@
   const WALL = () => Math.max(6, glassRect().w * 0.05);
 
   // ---- State -----------------------------------------------------------
-  let state = "intro";            // intro | playing | over
-  let phase = "ready";            // ready | pouring | judged
-  let timeLeft = SESSION, sessionScore = 0, glasses = 0;
+  let state = "intro";            // intro | playing | result | over
+  let phase = "ready";            // ready | pouring
   let fill = 0, foam = 0, target = 0.84;
   let tilt = 0, tiltSensor = 0, tiltSensorActive = false, tiltPointer = 0;
-  let nextAt = 0, lastResult = null;
+  let lastScore = 0, overAt = 0;
   let bubbles = [], spills = [], sparks = [], pops = [], bokeh = [];
   let cheers = 0, shake = 0, glow = 0, wobble = 0, wobbleV = 0;
 
@@ -227,21 +198,27 @@
   }
   function vibrate(p) { if (navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} }
 
-  // ---- Tilt (device orientation + pointer fallback) --------------------
+  // ---- Tilt (device orientation, no press needed) + cursor fallback ----
+  let tiltListenerAdded = false;
+  function onOrientation(e) {
+    if (e.gamma == null) return;
+    tiltSensorActive = true; tiltBtn.style.display = "none";   // phone tilt now drives the cup
+    tiltSensor = Math.max(-1, Math.min(1, e.gamma / 38));      // signed, ~38deg = full tilt
+  }
+  function addTiltListener() {
+    if (tiltListenerAdded) return; tiltListenerAdded = true;
+    window.addEventListener("deviceorientation", onOrientation);
+  }
   function enableTilt() {
-    function handle(e) {
-      if (e.gamma == null) return;
-      tiltSensorActive = true;
-      tiltSensor = Math.min(1, Math.abs(e.gamma) / 38);   // ~38deg = full tilt
-    }
     try {
       if (typeof DeviceOrientationEvent !== "undefined" &&
           typeof DeviceOrientationEvent.requestPermission === "function") {
+        // iOS 13+ : motion access needs explicit permission from a user gesture
         DeviceOrientationEvent.requestPermission()
-          .then((s) => { if (s === "granted") window.addEventListener("deviceorientation", handle); })
-          .catch(() => {});
+          .then((s) => { if (s === "granted") addTiltListener(); else tiltBtn.style.display = "block"; })
+          .catch(() => { tiltBtn.style.display = "block"; });
       } else if (typeof DeviceOrientationEvent !== "undefined") {
-        window.addEventListener("deviceorientation", handle);
+        addTiltListener();   // Android & others: works without a permission prompt
       }
     } catch (e) {}
   }
@@ -249,98 +226,89 @@
   // ---- Flow ------------------------------------------------------------
   function start() {
     audio(); enableTilt();
-    state = "playing"; timeLeft = SESSION; sessionScore = 0; glasses = 0;
+    state = "playing";
     startScreen.classList.add("hidden"); overScreen.classList.add("hidden");
-    hud.style.visibility = "visible"; timebarWrap.style.visibility = "visible";
     promptEl.style.visibility = "visible";
     bubbles = []; spills = []; sparks = []; pops = [];
-    updateHud(); newGlass();
+    newGlass();
+    showBest();
   }
 
   function newGlass() {
     fill = 0; foam = 0; wobble = 0; wobbleV = 0; cheers = 0;
-    tiltPointer = 0;
     target = 0.76 + Math.random() * 0.12;        // 0.76 .. 0.88
-    phase = "ready"; lastResult = null;
+    phase = "ready";
     resultEl.classList.remove("show");
-    promptEl.textContent = glasses === 0 ? "꾹 눌러 따르기 · 폰을 기울여 거품 줄이기" : "꾹 눌러서 따르기";
+    promptEl.textContent = "꾹 눌러서 따르기 · 기울여 거품 줄이기";
   }
 
   function beginPour() {
     if (phase !== "ready" || state !== "playing") return;
-    phase = "pouring"; promptEl.textContent = "기울이며 따르다가, 선에서 떼세요!";
+    phase = "pouring"; promptEl.textContent = "선에 닿으면 손을 떼세요!";
     startPourSound();
   }
 
   function judge() {
     if (phase !== "pouring") return;
-    phase = "judged"; stopPourSound(); wobbleV = -2.2;
-    const total = fill + foam;
+    phase = "done"; stopPourSound(); wobbleV = -2.2;
     const g = glassRect();
-    let pts, label, color;
+    const total = fill + foam;
+    let label, color;
 
     if (total > 1.0) {
-      pts = 0; label = "넘쳤다! 0"; color = "#ff7a6a"; lastResult = "spill";
+      lastScore = 0; label = "넘쳤다! 거품 폭발 🫧"; color = "#ff7a6a";
       thud(); vibrate([20, 30]); shake = 9;
     } else {
       const err = Math.abs(total - target);
-      let base = Math.max(0, Math.round(100 - err * 700));
-      let headBonus = (foam >= 0.05 && foam <= 0.16) ? 15 : (foam < 0.03 ? -5 : 0);
-      const perfect = err < 0.025 && foam >= 0.05 && foam <= 0.16;
-      if (perfect) {
-        pts = 120; label = "완벽! +1.5초 ⏱"; color = "#ffd27a"; lastResult = "perfect";
-        timeLeft += 1.5; doCheers();
-      } else {
-        pts = Math.max(0, Math.min(115, base + headBonus));
-        if (pts >= 80) { label = "좋아! +" + pts; color = "#bff5c0"; }
-        else if (pts >= 45) { label = "+" + pts; color = "#bfe6ff"; }
-        else { label = (total < target ? "조금 아쉽 " : "거품 과다 ") + "+" + pts; color = "#cdd6e6"; }
-        ting(pts >= 80 ? 760 : 520, 0, 0.14); vibrate(8);
-      }
+      const acc = Math.max(0, 1 - err / 0.25);
+      const headGood = foam >= 0.05 && foam <= 0.16;
+      const headMult = headGood ? 1.0 : (foam < 0.03 ? 0.85 : 0.8);
+      const perfect = err < 0.025 && headGood;
+      lastScore = perfect ? 1000 : Math.round(1000 * acc * headMult);
+      if (perfect) { label = "완벽한 한 잔! 🍻"; color = "#ffd27a"; doCheers(); }
+      else if (lastScore >= 750) { label = "훌륭해요!"; color = "#bff5c0"; doCheers(); }
+      else if (lastScore >= 450) { label = "좋아, 마실 만해!"; color = "#bfe6ff"; ting(680, 0, 0.14); }
+      else { label = total < target ? "조금 아쉽네 🍺" : "거품이 많네!"; color = "#cdd6e6"; ting(500, 0, 0.12); }
+      vibrate(perfect ? [12, 30, 12] : 8);
     }
-    sessionScore += pts; glasses++;
-    pops.push({ x: W / 2, y: g.y - 6, text: label, color, life: 1, vy: -40 });
+
+    pops.push({ x: W / 2, y: g.y - 6, text: lastScore + "점", color, life: 1.3, vy: -34 });
     showResult(label, color);
-    updateHud();
-    nextAt = performance.now() + (lastResult === "perfect" ? 650 : 520);
+
+    const best = parseInt(localStorage.getItem(BEST_KEY) || "0", 10) || 0;
+    if (lastScore > best) localStorage.setItem(BEST_KEY, String(lastScore));
+
+    state = "result";
+    overAt = performance.now() + (lastScore >= 750 ? 1500 : 1150);
   }
 
   function showResult(text, color) {
     resultEl.textContent = text; resultEl.style.color = color; resultEl.classList.add("show");
   }
-  function doCheers() { cheers = 0.001; glow = 1; vibrate([12, 30, 12]); }
+  function doCheers() { cheers = 0.001; glow = 1; }
 
-  function endSession() {
-    state = "over"; stopPourSound();
-    hud.style.visibility = "hidden"; timebarWrap.style.visibility = "hidden";
-    promptEl.style.visibility = "hidden"; resultEl.classList.remove("show");
-    renderOver();
-  }
-
-  function updateHud() {
-    scoreEl.textContent = sessionScore + "점";
-    const t = Math.max(0, Math.ceil(timeLeft));
-    timeEl.textContent = t;
-    timeEl.classList.toggle("warn", timeLeft <= 5);
-    const pct = Math.max(0, timeLeft / SESSION) * 100;
-    timebar.style.width = pct + "%";
-    timebar.style.background = timeLeft <= 5
-      ? "linear-gradient(90deg,#ff7a6a,#ff5a4a)" : "linear-gradient(90deg,#ffd27a,#ff9f43)";
+  function showBest() {
+    const best = parseInt(localStorage.getItem(BEST_KEY) || "0", 10) || 0;
+    bestTag.textContent = best > 0 ? "최고 " + best + "점" : "";
   }
 
   // ---- Ranking ---------------------------------------------------------
   function getRanks() { try { return JSON.parse(localStorage.getItem(RANKS_KEY) || "[]"); } catch (e) { return []; } }
   function saveRanks(r) { localStorage.setItem(RANKS_KEY, JSON.stringify(r.slice(0, 10))); }
 
+  function endSession() {
+    state = "over"; stopPourSound();
+    promptEl.style.visibility = "hidden"; resultEl.classList.remove("show");
+    tiltBtn.style.display = "none";
+    renderOver();
+  }
+
   function renderOver() {
     const ranks = getRanks();
     const lowest = ranks.length ? ranks[ranks.length - 1].score : 0;
-    const qualifies = ranks.length < 10 || sessionScore > lowest;
-    let myIndex = -1;
+    const qualifies = lastScore > 0 && (ranks.length < 10 || lastScore > lowest);
 
-    const head = `
-      <div class="label">점수 · ${glasses}잔</div>
-      <div class="bigscore">${sessionScore}</div>`;
+    const head = `<div class="label">이번 잔</div><div class="bigscore">${lastScore}</div>`;
 
     function listHtml(rs, hi) {
       if (!rs.length) return `<div class="hint">아직 기록이 없어요. 첫 주인공이 되어보세요!</div>`;
@@ -361,21 +329,20 @@
            <button id="saveName">등록</button>
          </div>
          <div id="rankList">${listHtml(ranks, -1)}</div>
-         <div class="cta" id="retryBtn" style="margin-top:18px">다시 도전</div>`;
+         <div class="cta" id="retryBtn" style="margin-top:18px">한 잔 더</div>`;
       overScreen.classList.remove("hidden");
       const input = $("nameInput");
       $("saveName").onclick = () => {
         const name = (input.value.trim() || "익명").slice(0, 10);
         localStorage.setItem(NAME_KEY, name);
         const list = getRanks();
-        const entry = { name, score: sessionScore, ts: Date.now() };
+        const entry = { name, score: lastScore, ts: Date.now() };
         list.push(entry); list.sort((a, b) => b.score - a.score);
         const trimmed = list.slice(0, 10);
-        myIndex = trimmed.indexOf(entry);
+        const myIndex = trimmed.indexOf(entry);
         saveRanks(trimmed);
         $("rankList").innerHTML = listHtml(trimmed, myIndex);
         $("nameInput").parentElement.style.display = "none";
-        $("saveName").parentElement.style.display = "none";
         ting(1180, 0, 0.2); ting(1560, 0.02, 0.16);
       };
       $("retryBtn").onclick = start;
@@ -383,9 +350,9 @@
     } else {
       const line = buddyLines[(Math.random() * buddyLines.length) | 0];
       overScreen.innerHTML = head +
-        `<div class="subtitle" style="margin-top:4px">${line}</div>` +
+        `<div class="subtitle" style="margin-top:4px">${lastScore === 0 ? "다음 잔은 천천히, 기울여서 🍺" : line}</div>` +
         listHtml(ranks, -1) +
-        `<div class="cta" id="retryBtn" style="margin-top:18px">다시 도전</div>`;
+        `<div class="cta" id="retryBtn" style="margin-top:18px">한 잔 더</div>`;
       overScreen.classList.remove("hidden");
       $("retryBtn").onclick = start;
     }
@@ -400,19 +367,13 @@
     const interiorTop = g.y + wall, interiorBot = g.y + g.h - wall;
     const interiorH = interiorBot - interiorTop;
 
-    // resolve tilt
+    // resolve tilt (sensor if present, else cursor position)
     const tTarget = tiltSensorActive ? tiltSensor : tiltPointer;
     tilt += (tTarget - tilt) * Math.min(1, dt * 12);
 
-    if (state === "playing") {
-      timeLeft -= dt;
-      updateHud();
-      if (timeLeft <= 0) { endSession(); return; }
-    }
-
     if (phase === "pouring") {
       fill += LIQUID_RATE * dt;
-      const foamFactor = 0.6 - tilt * 0.52;        // upright=0.6, tilted~0.08
+      const foamFactor = 0.6 - Math.abs(tilt) * 0.52;     // upright=0.6, tilted~0.08
       foam += LIQUID_RATE * Math.max(0.05, foamFactor) * dt;
       if (fill + foam > 1.0) {
         if (Math.random() < 0.6) spills.push({
@@ -423,11 +384,10 @@
       if (pourOsc) pourOsc.frequency.value = 220 + (fill + foam) * 260;
       if (Math.random() < 0.5) spawnBubble(g, wall, interiorBot, interiorH);
     } else if (foam > 0) {
-      foam = Math.max(0, foam - 0.05 * dt);        // foam slowly settles
+      foam = Math.max(0, foam - 0.05 * dt);
     }
 
-    // auto-advance to next glass
-    if (phase === "judged" && state === "playing" && performance.now() >= nextAt) newGlass();
+    if (state === "result" && performance.now() >= overAt) endSession();
 
     wobbleV += (-wobble) * 18 * dt; wobbleV *= 0.9; wobble += wobbleV * dt;
 
@@ -452,7 +412,7 @@
     for (const sp of sparks) { sp.vy += 400 * dt; sp.x += sp.vx * dt; sp.y += sp.vy * dt; sp.life -= dt * 1.5; }
     sparks = sparks.filter((s) => s.life > 0);
 
-    for (const p of pops) { p.y += p.vy * dt; p.life -= dt * 1.1; }
+    for (const p of pops) { p.y += p.vy * dt; p.life -= dt * 0.9; }
     pops = pops.filter((p) => p.life > 0);
 
     if (shake > 0) shake = Math.max(0, shake - dt * 26);
@@ -492,17 +452,14 @@
     if (lf > 0.001 || fm > 0.001) {
       ctx.save();
       roundRect(g.x + wall, interiorTop, g.w - 2 * wall, interiorH, r * 0.6); ctx.clip();
-      // liquid
       const grad = ctx.createLinearGradient(0, liquidTop, 0, interiorBot);
       grad.addColorStop(0, "#ffcf66"); grad.addColorStop(1, "#e08a1e");
       ctx.fillStyle = grad; ctx.fillRect(g.x + wall, liquidTop, g.w - 2 * wall, interiorBot - liquidTop);
-      // bubbles
       for (const b of bubbles) {
         ctx.globalAlpha = Math.max(0, Math.min(1, b.life)) * 0.7; ctx.fillStyle = "#fff3cf";
         ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill();
       }
       ctx.globalAlpha = 1;
-      // foam
       if (fm > 0.001) {
         const fh = liquidTop - foamTop;
         ctx.fillStyle = "#fbf6ec"; ctx.fillRect(g.x + wall, foamTop, g.w - 2 * wall, fh + 2);
@@ -514,7 +471,6 @@
       ctx.restore();
     }
 
-    // target line (player only, before judged)
     if (!isBuddy && (phase === "ready" || phase === "pouring")) {
       const yMid = interiorBot - target * interiorH;
       ctx.fillStyle = "rgba(255,210,120,0.10)";
@@ -553,7 +509,7 @@
     }
 
     const cIn = cheers > 0 ? Math.sin(Math.min(cheers, 1) * Math.PI) : 0;
-    const playerTilt = (phase === "pouring" || phase === "ready") ? -tilt * MAX_TILT : -cIn * 0.12;
+    const playerTilt = (phase === "ready" || phase === "pouring") ? tilt * MAX_TILT : -cIn * 0.12;
     drawGlass(W / 2 - cIn * g.w * 0.10, 1, playerTilt, false);
     if (cheers > 0) {
       const enter = Math.min(1, cheers / 0.5);
@@ -564,18 +520,16 @@
       ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill(); }
     for (const sp of sparks) { ctx.globalAlpha = Math.max(0, sp.life);
       ctx.fillStyle = `hsl(${sp.hue},100%,70%)`; ctx.fillRect(sp.x - 2, sp.y - 2, 4, 4); }
-    // score pops
     ctx.textAlign = "center"; ctx.font = `800 ${Math.round(W * 0.05)}px -apple-system, system-ui, sans-serif`;
     for (const p of pops) { ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 1.4));
       ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y); }
     ctx.globalAlpha = 1;
 
-    // tilt indicator while pouring (foam feedback)
-    if (phase === "pouring" || phase === "ready") {
-      const pct = Math.round(tilt * 100);
-      ctx.globalAlpha = 0.8; ctx.fillStyle = tilt > 0.45 ? "#9fe7a0" : "#ffd27a";
+    if (phase === "ready" || phase === "pouring") {
+      const tilted = Math.abs(tilt) > 0.45;
+      ctx.globalAlpha = 0.85; ctx.fillStyle = tilted ? "#9fe7a0" : "#ffd27a";
       ctx.font = `700 ${Math.round(W * 0.036)}px -apple-system, system-ui, sans-serif`;
-      ctx.fillText(tilt > 0.45 ? "기울임 좋아요 · 거품 ↓" : "📱 기울이면 거품 ↓", W / 2, g.y + g.h + 34);
+      ctx.fillText(tilted ? "기울임 좋아요 · 거품 ↓" : "기울이면 거품이 줄어요 ↓", W / 2, g.y + g.h + 34);
       ctx.globalAlpha = 1;
     }
 
@@ -594,15 +548,15 @@
   }
   function onUp() { if (state === "playing" && phase === "pouring") judge(); }
   function onMove(x) {
-    if (phase === "pouring" && !tiltSensorActive)
-      tiltPointer = Math.min(1, Math.abs(x - W / 2) / (W * 0.36));
+    // cursor position drives tilt continuously (even before pouring)
+    if (!tiltSensorActive) tiltPointer = Math.max(-1, Math.min(1, (x - W / 2) / (W * 0.36)));
   }
 
   window.addEventListener("pointerdown", (e) => {
-    if (state === "over") return;             // over screen uses its own buttons
-    e.preventDefault(); onDown();
+    if (state === "over") return;
+    e.preventDefault(); onMove(e.clientX); onDown();
   }, { passive: false });
-  window.addEventListener("pointermove", (e) => { if (state === "playing") onMove(e.clientX); });
+  window.addEventListener("pointermove", (e) => { if (state !== "over") onMove(e.clientX); });
   window.addEventListener("pointerup", (e) => { if (state === "over") return; e.preventDefault(); onUp(); }, { passive: false });
   window.addEventListener("pointercancel", () => { if (phase === "pouring") judge(); });
   window.addEventListener("keydown", (e) => {
@@ -610,13 +564,15 @@
     if (state === "intro") start(); else if (phase === "ready") beginPour();
   });
   window.addEventListener("keyup", (e) => { if (e.code === "Space" && phase === "pouring") judge(); });
-  $("startBtn").addEventListener("click", (e) => { e.stopPropagation(); start(); });
+  // Tapping the tilt button must re-request motion permission, not start a pour.
+  tiltBtn.addEventListener("pointerdown", (e) => { e.stopPropagation(); e.preventDefault(); enableTilt(); });
   document.addEventListener("gesturestart", (e) => e.preventDefault());
   document.addEventListener("dblclick", (e) => e.preventDefault());
 
   // ---- Boot ------------------------------------------------------------
   for (let i = 0; i < 14; i++) bokeh.push({ x: Math.random() * W, y: Math.random() * H,
     r: 30 + Math.random() * 80, a: 0.05 + Math.random() * 0.1, spd: 4 + Math.random() * 10 });
+  showBest();
   requestAnimationFrame(loop);
 
   if ("serviceWorker" in navigator)

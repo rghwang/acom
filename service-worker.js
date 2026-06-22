@@ -1,5 +1,5 @@
 /* Offline cache so the game works on the train with no signal. */
-const CACHE = "cheers-v2";
+const CACHE = "cheers-v4";
 const ASSETS = [
   "./",
   "./index.html",
