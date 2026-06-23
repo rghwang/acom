@@ -122,15 +122,25 @@
   const startScreen = $("startScreen"), overScreen = $("overScreen");
 
   // ---- Sizing ----------------------------------------------------------
+  // Derive the drawing size from the canvas's REAL on-screen box, not from
+  // window.innerWidth/Height (which can be larger than the visible viewport
+  // on iOS Safari / inside html previewers, pushing content off-centre).
   let W = 0, H = 0, DPR = 1;
   function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const cssW = Math.round(rect.width) || window.innerWidth;
+    const cssH = Math.round(rect.height) || window.innerHeight;
     DPR = Math.min(window.devicePixelRatio || 1, 3);
-    W = window.innerWidth; H = window.innerHeight;
-    canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
-    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    W = cssW; H = cssH;
+    const bw = Math.round(cssW * DPR), bh = Math.round(cssH * DPR);
+    if (canvas.width !== bw || canvas.height !== bh) { canvas.width = bw; canvas.height = bh; }
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
-  window.addEventListener("resize", resize); resize();
+  window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", () => setTimeout(resize, 250));
+  window.addEventListener("load", resize);
+  if (window.ResizeObserver) { try { new ResizeObserver(resize).observe(canvas); } catch (e) {} }
+  resize();
 
   // ---- Config ----------------------------------------------------------
   const LIQUID_RATE = 0.5;        // liquid fraction filled per second
